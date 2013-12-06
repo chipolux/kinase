@@ -240,31 +240,32 @@ def parse_reply(reply):
         response = 'Unkown response value type.'
     return request_id, object_id, response_type, response
 
-def get_snmp(object_id, host, community='public', port=161):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    message = build_message(object_id, community, request_type='get')
-    sock.sendto(message, (host, port))
-    reply = sock.recv(1024)
-    return parse_reply(reply)
-
 class SNMPHelper:
     def __init__(self, host, community='public', port=161, timeout=1):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._sock.settimeout(timeout)
-        self._community_hex = community_to_hex(community)
+        self._host = host
+        self._port = port
+        self._community = community
         self._request_counter = 0
     
     def get(self, object_id):
-        pass
+        message = build_message(object_id, self._community, request_type='get')
+        self._sock.sendto(message, (self._host, self._port))
+        reply = self._sock.recv(1024)
+        return parse_reply(reply)
     
     def get_next(self, object_id):
-        pass
+        message = build_message(object_id, self._community, request_type='get_next')
+        self._sock.sendto(message, (self._host, self._port))
+        reply = self._sock.recv(1024)
+        return parse_reply(reply)
     
     def set(self, object_id, value):
-        pass
-    
-    def build_message(self):
-        pass
+        message = build_message(object_id, self._community, request_type='set')
+        self._sock.sendto(message, (self._host, self._port))
+        reply = self._sock.recv(1024)
+        return parse_reply(reply)
 
 class SNMPRequest:
     _simple_types = {'boolean': hex(1),
@@ -295,13 +296,12 @@ class SNMPRequest:
         pass
 
 if __name__ == '__main__':
-    host = '***REMOVED***'
-    communities = ['***REMOVED***', '***REMOVED***']
+    snmp = SNMPHelper('***REMOVED***', '***REMOVED***')
     oids = ['.1.3.6.1.2.1.1.1.0', '.1.3.6.1.2.1.17.4.3.1.1', '1.3.6.1.2.1.2.2.1.6.10005']
     
     for oid in oids:
         try:
-            result = get_snmp(oid, host, communities[0])
+            result = snmp.get(oid)
             print '%s: %s' % (result[1], result[3])
         except AssertionError, e:
             print '%s: %s' % (result[1], e.message)

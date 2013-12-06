@@ -4,13 +4,9 @@ Created on Fri Dec 06 10:40:00 2013
 
 @author: ***REMOVED***
 """
-from .kinase import (get_snmp,
-                     SNMPRequest,
-                     SNMPHelper)
+from .kinase import (SNMPHelper)
 
-__all__ = ['get_snmp',
-           'SNMPRequest',
-           'SNMPHelper']
+__all__ = ['SNMPHelper']
 
 __version__ = '0.1'
 
