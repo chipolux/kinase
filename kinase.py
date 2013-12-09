@@ -32,25 +32,22 @@ def hex_to_oid(hex_string):
     assert ord(hex_string[0]) == 43, 'Invalid OID prefix.'
     hex_string = hex_string[1:]
     oid = ['1', '3']
-    while True:
-        length = 1
-        if len(bin(ord(hex_string[0]))[2:]) > 7:
-            for i in range(1, len(hex_string)):
-                length += 1
-                if len(bin(ord(hex_string[i]))[2:]) < 7:
-                    break
-            binary = ''
-            for i in range(length):
-                if len(bin(ord(hex_string[i]))[2:]) < 7:
-                    binary += bin(ord(hex_string[i]))[2:].zfill(7)
-                else:
-                    binary += bin(ord(hex_string[i]))[3:]
-            oid.append(str(int(binary, 2)))
+    big_int = False
+    for c in hex_string:
+        if big_int:
+            if len(bin(ord(c))[2:]) <= 7:
+                big_int = False
+                binary += bin(ord(c))[2:].zfill(7)
+                oid.append(str(int(binary, 2)))
+            else:
+                binary += bin(ord(c))[3:]
         else:
-            oid.append(str(ord(hex_string[0])))
-        hex_string = hex_string[length:]
-        if len(hex_string) == 0:
-            break
+            if len(bin(ord(c))[2:]) <= 7:
+                oid.append(str(ord(c)))
+            elif len(bin(ord(c))[2:]) > 7:
+                big_int = True
+                binary = ''
+                binary += bin(ord(c))[3:]
     return '.'.join(oid)
 
 def oid_to_hex(object_id):
@@ -253,30 +250,31 @@ class SNMPHelper:
         message = build_message(object_id, self._community, request_type='get')
         self._sock.sendto(message, (self._host, self._port))
         reply = self._sock.recv(1024)
+        self._request_counter += 1
         return parse_reply(reply)
     
     def get_next(self, object_id):
         message = build_message(object_id, self._community, request_type='get_next')
         self._sock.sendto(message, (self._host, self._port))
         reply = self._sock.recv(1024)
+        self._request_counter += 1
         return parse_reply(reply)
     
     def set(self, object_id, value):
         message = build_message(object_id, self._community, request_type='set')
         self._sock.sendto(message, (self._host, self._port))
         reply = self._sock.recv(1024)
+        self._request_counter += 1
         return parse_reply(reply)
     
     def walk(self, object_id):
-        object_ids = []
+        base_id = object_id.strip('.')
         replies = []
         while True:
             try:
                 reply = self.get_next(object_id)
-                if reply[1] in object_ids:
+                if not reply[1].startswith(base_id):
                     break
-                else:
-                    object_ids.append(reply[1])
                 replies.append({'sent_id': object_id,
                                 'id': reply[1],
                                 'type': reply[2],
