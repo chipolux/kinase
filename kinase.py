@@ -86,7 +86,7 @@ def oid_to_hex(object_id):
             new_elements.append(hex(element))
     return new_elements
 
-def build_message(object_id, community='public', request_type='get'):
+def build_message(object_id, community='public', request_type='get', request_id=0):
     if request_type == 'get':
         request_type = '0xa0'
     elif request_type == 'get_next':
@@ -266,6 +266,25 @@ class SNMPHelper:
         self._sock.sendto(message, (self._host, self._port))
         reply = self._sock.recv(1024)
         return parse_reply(reply)
+    
+    def walk(self, object_id):
+        object_ids = []
+        replies = []
+        while True:
+            try:
+                reply = self.get_next(object_id)
+                if reply[1] in object_ids:
+                    break
+                else:
+                    object_ids.append(reply[1])
+                replies.append({'sent_id': object_id,
+                                'id': reply[1],
+                                'type': reply[2],
+                                'value': reply[3]})
+                object_id = reply[1]
+            except:
+                break
+        return replies
 
 class SNMPRequest:
     _simple_types = {'boolean': hex(1),
