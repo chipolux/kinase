@@ -17,15 +17,9 @@ def get_hex_int(hex_string):
     """Parse int out of hex stream."""
     if len(bin(ord(hex_string[0]))[2:]) <= 7:
         return 1, ord(hex_string[0])
-    bits = []
-    for c in hex_string:
-        if len(bin(ord(c))[2:]) > 7:
-            bits.append(bin(ord(c))[2:])
-        else:
-            break
-    count = len(bits)
-    binary = ''.join([bit[1:] for bit in bits])
-    return count, int(binary, 2)
+    count = (ord(hex_string[0]) - 0x80) + 1
+    hex_int = ''.join(['{:02x}'.format(ord(c)) for c in hex_string[1:count]])
+    return count, int(hex_int, 16)
 
 def hex_to_oid(hex_string):
     """Parse object id out of hex string."""
@@ -221,7 +215,7 @@ def parse_reply(reply):
     reply = reply[count:]
     if result_type == 2:
         response_type = 'int'
-        response = ''.join([hex(ord(c)) for c in reply]).replace('0x', '')
+        response = ''.join(['{:02x}'.format(ord(c)) for c in reply])
         response = int(response, 16)
     elif result_type == 4:
         # Octet String
