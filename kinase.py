@@ -225,10 +225,15 @@ def parse_reply(reply):
         # Object ID
         response_type = 'oid'
         response = hex_to_oid(reply)
+    elif result_type == 67:
+        # Timeticks
+        response_type = 'time'
+        response = ''.join(['{:02x}'.format(ord(c)) for c in reply])
+        response = int(response, 16)
     else:
         # Unknown
         response_type = 'unk'
-        response = 'Unkown response value type.'
+        response = 'Unkown response value type: %s' % result_type
     return request_id, object_id, response_type, response
 
 class SNMPHelper:
