@@ -2,7 +2,7 @@
 """
 Created on Fri Dec 06 10:40:32 2013
 
-@author: ***REMOVED***
+@author: chipolux
 """
 import socket
 
@@ -312,7 +312,9 @@ class SNMPRequest:
         pass
 
 if __name__ == '__main__':
-    snmp = SNMPHelper('***REMOVED***', '***REMOVED***')
+    host = raw_input('Hostname: ')
+    comm = raw_input('Community: ')
+    snmp = SNMPHelper(host, comm)
     oids = ['.1.3.6.1.2.1.1.1.0', '.1.3.6.1.2.1.17.4.3.1.1', '1.3.6.1.2.1.2.2.1.6.10005']
     
     for oid in oids:

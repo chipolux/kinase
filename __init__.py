@@ -2,7 +2,7 @@
 """
 Created on Fri Dec 06 10:40:00 2013
 
-@author: ***REMOVED***
+@author: chipolux
 """
 from .kinase import (SNMPHelper)
 
