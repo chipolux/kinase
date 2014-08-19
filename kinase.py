@@ -218,6 +218,7 @@ def parse_reply(reply):
     count, hex_int = get_hex_int(reply)
     reply = reply[count:]
     if result_type == 2:
+        # Int
         response_type = 'int'
         response = ''.join(['{:02x}'.format(ord(c)) for c in reply])
         response = int(response, 16)
@@ -231,9 +232,10 @@ def parse_reply(reply):
         response = hex_to_oid(reply)
     elif result_type == 67:
         # Timeticks
-        response_type = 'time'
+        response_type = 'seconds'
         response = ''.join(['{:02x}'.format(ord(c)) for c in reply])
         response = int(response, 16)
+        response = response/100.0
     else:
         # Unknown
         response_type = 'unk'
