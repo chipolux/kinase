@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 """
+kinase
+Kinase Is Not An SNMP Engine
+
 Created on Fri Dec 06 10:40:32 2013
 
 @author: chipolux
 """
+from .exceptions import IncompleteMessage
 import socket
 
 def community_to_hex(community):
@@ -137,7 +141,7 @@ def parse_reply(reply):
     count, hex_int = get_hex_int(reply)
     actual_length = len(reply[count:])
     if actual_length < hex_int:
-        raise Exception('Did not recv entire message: %s bytes of %s' % (actual_length, hex_int))
+        raise IncompleteMessage('Recieved %s bytes of %s' % (actual_length, hex_int))
     reply = reply[count:]
     # Check/Parse Message Version
     assert ord(reply[0]) == 2, 'Message has invalid version type.'
